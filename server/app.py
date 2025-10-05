@@ -22,6 +22,18 @@ def index():
 
 # Add views here
 
+@app.route('/earthquakes/<int:id>')
+def get_earthquake(id):
+    earthquake = Earthquake.query.get(id)
+    if not earthquake:
+        return jsonify({"error": "Earthquake not found"}), 404
+    return jsonify({
+        "id": earthquake.id,
+        "magnitude": earthquake.magnitude,
+        "location": earthquake.location,
+        "year": earthquake.year
+    })
+
 @app.route('/earthquakes/magnitude/<float:magnitude>')
 def get_earthquakes_by_magnitude(magnitude):
     earthquakes = Earthquake.query.filter_by(magnitude=magnitude).all()
@@ -35,18 +47,6 @@ def get_earthquakes_by_magnitude(magnitude):
                 "year": eq.year
             } for eq in earthquakes
         ]
-    })
-
-@app.route('/earthquakes/<int:id>')
-def get_earthquake(id):
-    earthquake = Earthquake.query.get(id)
-    if not earthquake:
-        return jsonify({"error": "Earthquake not found"}), 404
-    return jsonify({
-        "id": earthquake.id,
-        "magnitude": earthquake.magnitude,
-        "location": earthquake.location,
-        "year": earthquake.year
     })
 
 if __name__ == '__main__':
