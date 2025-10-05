@@ -22,23 +22,32 @@ def index():
 
 # Add views here
 
-@app.route("/earthquakes/<int:id>", methods=["GET"])
-def get_earthquake(id):
-    quake = db.session.get(Earthquake, id)
-
-    if quake:
-        return jsonify(quake.to_dict()), 200
-    else:
-        return jsonify({"message": f"Earthquake {id} not found."}), 404
-
-@app.route("/earthquakes/magnitude/<float:magnitude>", methods=["GET"])
+@app.route('/earthquakes/magnitude/<float:magnitude>')
 def get_earthquakes_by_magnitude(magnitude):
-    quakes = Earthquake.query.filter(Earthquake.magnitude >= magnitude).all()
-
+    earthquakes = Earthquake.query.filter_by(magnitude=magnitude).all()
     return jsonify({
-        "count": len(quakes),
-        "quakes": [q.to_dict() for q in quakes]
-    }), 200
+        "count": len(earthquakes),
+        "quakes": [
+            {
+                "id": eq.id,
+                "magnitude": eq.magnitude,
+                "location": eq.location,
+                "year": eq.year
+            } for eq in earthquakes
+        ]
+    })
+
+@app.route('/earthquakes/<int:id>')
+def get_earthquake(id):
+    earthquake = Earthquake.query.get(id)
+    if not earthquake:
+        return jsonify({"error": "Earthquake not found"}), 404
+    return jsonify({
+        "id": earthquake.id,
+        "magnitude": earthquake.magnitude,
+        "location": earthquake.location,
+        "year": earthquake.year
+    })
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
